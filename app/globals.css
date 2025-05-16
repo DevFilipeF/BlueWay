@@ -1,0 +1,575 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 210 100% 40%; /* Azul */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%; /* Azul claro */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 100% 40%; /* Azul */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 210 100% 40%; /* Azul */
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 100% 50%; /* Azul */
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 210 100% 50%; /* Azul */
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Estilos para o Leaflet */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  font-family: inherit;
+}
+
+.map-container {
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom {
+  z-index: 800;
+}
+
+/* Estilizar os controles de zoom */
+.leaflet-control-zoom {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  margin-bottom: 80px !important; /* Espaço para o botão de solicitar van */
+}
+
+.leaflet-control-zoom a {
+  background-color: white !important;
+  color: #333 !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  border: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f5f5f5 !important;
+  color: #000 !important;
+}
+
+.leaflet-control-zoom-in {
+  border-bottom: 1px solid #eee !important;
+}
+
+/* Estilizar os popups */
+.leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  font-family: inherit;
+  width: auto !important;
+  min-width: 150px;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  background-color: white;
+}
+
+.custom-popup h3 {
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup-close-button {
+  color: #666 !important;
+  font-size: 18px !important;
+  padding: 8px 8px 0 0 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 700;
+}
+
+.leaflet-marker-pane {
+  z-index: 600;
+}
+
+.leaflet-overlay-pane {
+  z-index: 400;
+}
+
+.leaflet-shadow-pane {
+  z-index: 500;
+}
+
+.leaflet-tile-pane {
+  z-index: 200;
+}
+
+/* Animações para a van */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+@keyframes drive {
+  0% {
+    transform: translateX(-3px) translateY(0);
+  }
+  25% {
+    transform: translateX(0) translateY(-2px);
+  }
+  50% {
+    transform: translateX(3px) translateY(0);
+  }
+  75% {
+    transform: translateX(0) translateY(2px);
+  }
+  100% {
+    transform: translateX(-3px) translateY(0);
+  }
+}
+
+/* Estilo para marcadores personalizados */
+.custom-marker-container {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.custom-marker-container:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.custom-marker-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #06c167;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+}
+
+.custom-marker-container.destructive .custom-marker-icon {
+  background-color: #e11d48;
+}
+
+.custom-marker-container.blue .custom-marker-icon {
+  background-color: #06c167;
+}
+
+.custom-marker-container.green .custom-marker-icon {
+  background-color: #06c167;
+}
+
+.custom-marker-shadow {
+  position: absolute;
+  bottom: -5px;
+  left: 5px;
+  right: 5px;
+  height: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  filter: blur(5px);
+  z-index: 1;
+}
+
+.with-pulse {
+  position: relative;
+}
+
+.with-pulse::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.3;
+  z-index: 0;
+  animation: pulsate 2s ease-out infinite;
+}
+
+.pulse-circle {
+  animation: pulsate 2s ease-out infinite;
+}
+
+.van-icon-with-logo {
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+  position: relative;
+  transition: transform 0.5s ease;
+  transform-origin: center center;
+  will-change: transform; /* Otimização para animações suaves */
+}
+
+/* Estilo do ponteiro da van estilo Uber */
+.van-icon-with-logo::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background-color: rgba(6, 193, 103, 0.2);
+  z-index: -1;
+  animation: pulse 2s infinite;
+}
+
+.van-icon-with-logo::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background-image: url("https://cdn-icons-png.flaticon.com/512/1946/1946429.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+}
+
+.van-moving {
+  animation: drive 2s infinite;
+}
+
+.user-location-icon {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
+}
+
+.pulse-effect {
+  position: relative;
+}
+
+.pulse-effect::after {
+  content: "";
+  position: absolute;
+  border: 2px solid #06c167;
+  left: -10px;
+  right: -10px;
+  top: -10px;
+  bottom: -10px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  opacity: 0;
+}
+
+.destination-icon {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
+}
+
+/* Estilo para a rota */
+.leaflet-interactive {
+  stroke-dasharray: none !important;
+  transition: stroke 0.5s ease, stroke-opacity 0.5s ease;
+}
+
+/* Efeitos para as rotas */
+.route-shadow {
+  filter: blur(4px);
+}
+
+.route-main {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-glow {
+  filter: blur(1px);
+}
+
+/* Animação de desaparecimento */
+.fade-out {
+  animation: fadeOut 1s forwards;
+}
+
+/* Esconder marcador invisível */
+.invisible-marker {
+  opacity: 0;
+}
+
+/* Animação de rastro para a van */
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-animated {
+  stroke-dasharray: 10;
+  stroke-dashoffset: 1000;
+  animation: dash 15s linear forwards;
+}
+
+/* Efeito de brilho para a van */
+.van-glow {
+  filter: drop-shadow(0 0 8px rgba(6, 193, 103, 0.7));
+}
+
+/* Efeito de sombra em movimento */
+.moving-shadow {
+  animation: shadowMove 2s infinite alternate;
+}
+
+@keyframes shadowMove {
+  0% {
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  100% {
+    filter: drop-shadow(-2px 2px 4px rgba(0, 0, 0, 0.3));
+  }
+}
+
+/* Animação estilo Uber para o ponteiro da van */
+@keyframes uberPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(6, 193, 103, 0.4);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(6, 193, 103, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(6, 193, 103, 0);
+  }
+}
+
+.uber-style-marker {
+  animation: uberPulse 2s infinite;
+}
+
+/* Otimizações para evitar tremores */
+.leaflet-fade-anim .leaflet-tile,
+.leaflet-fade-anim .leaflet-popup {
+  will-change: opacity;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  will-change: transform;
+  transform-origin: 0 0;
+}
+
+/* Desativar animações de zoom para evitar tremores */
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+}
+
+/* Melhorar a suavidade das transições */
+.leaflet-container {
+  transition: all 0.2s ease;
+}
+
+/* Estilo para o botão de solicitar van */
+.request-van-button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 30px;
+  background: linear-gradient(to right, #06c167, #05a75a);
+  color: white;
+  box-shadow: 0 4px 14px rgba(6, 193, 103, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.request-van-button:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(6, 193, 103, 0.5);
+}
+
+.request-van-button:active {
+  transform: translateX(-50%) translateY(0);
+  box-shadow: 0 2px 10px rgba(6, 193, 103, 0.3);
+}
+
+/* Estilos para o footer de navegação */
+.footer-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.footer-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.footer-nav-item.active {
+  color: #06c167;
+}
+
+.footer-nav-item span {
+  font-size: 0.7rem;
+  margin-top: 4px;
+}
+
+/* Ajuste para o conteúdo principal com footer fixo */
+.main-content-with-footer {
+  padding-bottom: 70px;
+}
+
+/* Estilo para o botão principal do Uber */
+.uber-primary-button {
+  background-color: #000000;
+  color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.uber-primary-button:hover {
+  background-color: #333333;
+}
+
+/* Estilo para cards estilo Uber */
+.uber-card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.uber-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Estilo para inputs estilo Uber */
+.uber-input {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.uber-input:focus {
+  border-color: #06c167;
+  box-shadow: 0 0 0 2px rgba(6, 193, 103, 0.2);
+}
