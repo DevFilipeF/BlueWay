@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, ZoomControl } from "react-leaflet"
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, ZoomControl, useMapEvents } from "react-leaflet"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { Button } from "@/components/ui/button"
@@ -214,6 +214,13 @@ function AnimatedVanMarker({
     }
   }, [routePoints, rideStage, animateMovement, onPositionChange])
 
+  return null
+}
+
+function MapEvents({ onClick }: { onClick: (e: L.LeafletMouseEvent) => void }) {
+  useMapEvents({
+    click: onClick,
+  })
   return null
 }
 
@@ -626,10 +633,10 @@ export function LeafletMap({
         zoomControl={false}
         className="map-container"
         zoomAnimation={false}
-        onClick={handleMapClick}
       >
-        <TileLayer attribution={getTileAttribution()} url={getTileUrl()} />
+        <TileLayer url={getTileUrl()} />
         <ZoomControl position="bottomright" />
+        <MapEvents onClick={handleMapClick} />
 
         {/* Renderizar todas as rotas disponíveis */}
         {vanRoutes.map((route) => (

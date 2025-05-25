@@ -208,6 +208,15 @@ export default function CadastroPage() {
           </div>
         </div>
       </div>
+
+      <div className="mt-4 text-center">
+        <p className="text-muted-foreground">
+        Quer ser motorista?{" "}
+        <Link href="/motorista/cadastro" className="text-blue-600 font-medium hover:underline">
+        Cadastre-se como motorista
+        </Link>
+        </p>
+      </div>
     </div>
   )
 }

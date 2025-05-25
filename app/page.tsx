@@ -220,7 +220,7 @@ export default function Home() {
 
     // Verificar se tem créditos suficientes se o método de pagamento for crédito social
     if (rideDetails.paymentMethod === "social") {
-      const success = spendCredits(7) // Gastar 7 créditos
+      const success = spendCredits(7) 
       if (!success) {
         setErrorMessage("Créditos insuficientes. Por favor, escolha outro método de pagamento.")
         setIsPaymentModalOpen(false)

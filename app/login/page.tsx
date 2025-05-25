@@ -180,6 +180,15 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      <div className="mt-4 text-center">
+        <p className="text-muted-foreground">
+        É motorista?{" "}
+        <Link href="/motorista/login" className="text-blue-600  font-medium hover:underline">
+        Acesse a área do motorista
+        </Link>
+        </p>
+        </div>
     </div>
   )
 }
