@@ -228,14 +228,16 @@ export default function DriverDashboard() {
     const earning = 8.5
     setDailyEarnings((prev) => prev + earning)
 
-    const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
-    earningsHistory.unshift({
-      amount: earning,
-      description: "Passageiro desembarcado",
-      date: new Date().toLocaleDateString("pt-BR"),
-      time: new Date().toLocaleTimeString("pt-BR"),
-    })
-    localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
+    if (typeof window !== "undefined") {
+      const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
+      earningsHistory.unshift({
+        amount: earning,
+        description: "Passageiro desembarcado",
+        date: new Date().toLocaleDateString("pt-BR"),
+        time: new Date().toLocaleTimeString("pt-BR"),
+      })
+      localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
+    }
 
     setTimeout(() => {
       const newPassengers = generateNewPassengers()
@@ -304,15 +306,17 @@ export default function DriverDashboard() {
     if (!driver) return
     setDailyEarnings(0)
 
-    const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
-    earningsHistory.unshift({
-      amount: -amount,
-      description: `Saque via ${method === "pix" ? "PIX" : "Transferência Bancária"}`,
-      date: new Date().toLocaleDateString("pt-BR"),
-      time: new Date().toLocaleTimeString("pt-BR"),
-      transactionId: details.transactionId,
-    })
-    localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
+    if (typeof window !== "undefined") {
+      const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
+      earningsHistory.unshift({
+        amount: -amount,
+        description: `Saque via ${method === "pix" ? "PIX" : "Transferência Bancária"}`,
+        date: new Date().toLocaleDateString("pt-BR"),
+        time: new Date().toLocaleTimeString("pt-BR"),
+        transactionId: details.transactionId,
+      })
+      localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
+    }
 
     showSuccess(`Saque realizado!`)
   }
