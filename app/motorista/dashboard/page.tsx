@@ -76,13 +76,24 @@ export default function DriverDashboard() {
 
   // Adicionar estado para controlar capacidade
   const [vanCapacity, setVanCapacity] = useState({
-    total: driver?.vehicle?.capacity || 16,
+    total: 16,
     occupied: 0,
-    available: driver?.vehicle?.capacity || 16,
+    available: 16,
   })
 
   // Estado para controlar a aba ativa
   const [activeTab, setActiveTab] = useState("waiting")
+
+  // Inicializar vanCapacity quando o driver estiver disponível
+  useEffect(() => {
+    if (driver?.vehicle?.capacity) {
+      setVanCapacity({
+        total: driver.vehicle.capacity,
+        occupied: 0,
+        available: driver.vehicle.capacity,
+      })
+    }
+  }, [driver])
 
   // Polling para atualizações em tempo real
   useEffect(() => {
