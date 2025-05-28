@@ -39,15 +39,15 @@ import {
   type LiveTrip,
   type DriverNotification,
 } from "@/services/real-time-service"
-import { DriverProtectedRoute } from "@/components/driver-protected-route"
-import { DriverSettingsModal } from "@/components/driver-settings-modal"
-import { DriverHistoryModal } from "@/components/driver-history-modal"
-import { DriverProfileModal } from "@/components/driver-profile-modal"
-import { DriverRouteConfigModal } from "@/components/driver-route-config-modal"
-import { DriverRouteViewModal } from "@/components/driver-route-view-modal"
-import { DriverWithdrawalModal } from "@/components/driver-withdrawal-modal"
-import { DriverRouteMapModal } from "@/components/driver-route-map-modal"
-import { LeafletMap } from "@/components/leaflet-map"
+// import { DriverProtectedRoute } from "@/components/driver-protected-route"
+// import { DriverSettingsModal } from "@/components/driver-settings-modal"
+// import { DriverHistoryModal } from "@/components/driver-history-modal"
+// import { DriverProfileModal } from "@/components/driver-profile-modal"
+// import { DriverRouteConfigModal } from "@/components/driver-route-config-modal"
+// import { DriverRouteViewModal } from "@/components/driver-route-view-modal"
+// import { DriverWithdrawalModal } from "@/components/driver-withdrawal-modal"
+// import { DriverRouteMapModal } from "@/components/driver-route-map-modal"
+// import { LeafletMap } from "@/components/leaflet-map"
 
 export default function DriverDashboard() {
   const { driver, updateStatus, logout, updateDriver } = useDriverAuth()
@@ -446,7 +446,7 @@ export default function DriverDashboard() {
   // Se estiver mostrando o mapa, renderizar apenas o mapa
   if (showMapView) {
     return (
-      <DriverProtectedRoute>
+      // <DriverProtectedRoute>
         <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
           {/* Header do Mapa */}
           <div className="bg-white shadow-sm border-b px-4 py-3 flex-shrink-0">
@@ -470,11 +470,11 @@ export default function DriverDashboard() {
 
           {/* Mapa */}
           <div className="flex-1 p-4">
-            <LeafletMap
+            {/* <LeafletMap
               userLocation={[-23.563, -46.6543]}
               selectedRoute={currentRoute}
               rideStage={currentTrip ? "journey" : ""}
-            />
+            /> */}
           </div>
 
           {/* Info da viagem no mapa */}
@@ -497,12 +497,12 @@ export default function DriverDashboard() {
             </div>
           )}
         </div>
-      </DriverProtectedRoute>
+      // </DriverProtectedRoute>
     )
   }
 
   return (
-    <DriverProtectedRoute>
+    // <DriverProtectedRoute>
       <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
         {/* Header Compacto */}
         <div className="bg-white shadow-sm border-b px-4 py-3 flex-shrink-0">
@@ -871,23 +871,23 @@ export default function DriverDashboard() {
         </Dialog>
 
         {/* Modais */}
-        <DriverSettingsModal
+        {/* <DriverSettingsModal
           open={showSettingsModal}
           onOpenChange={setShowSettingsModal}
           driver={driver}
           onUpdateDriver={updateDriver}
-        />
+        /> */}
 
-        <DriverHistoryModal open={showHistoryModal} onOpenChange={setShowHistoryModal} driverId={driver.id} />
+        {/* <DriverHistoryModal open={showHistoryModal} onOpenChange={setShowHistoryModal} driverId={driver.id} /> */}
 
-        <DriverProfileModal
+        {/* <DriverProfileModal
           open={showProfileModal}
           onOpenChange={setShowProfileModal}
           driver={driver}
           onUpdateDriver={updateDriver}
-        />
+        /> */}
 
-        <DriverRouteConfigModal
+        {/* <DriverRouteConfigModal
           open={showRouteConfigModal}
           onOpenChange={setShowRouteConfigModal}
           currentRoute={currentRoute}
@@ -895,21 +895,21 @@ export default function DriverDashboard() {
             setCurrentRoute(route)
             showSuccess(`Rota configurada: ${route.name}`)
           }}
-        />
+        /> */}
 
-        <DriverRouteViewModal open={showRouteViewModal} onOpenChange={setShowRouteViewModal} route={currentRoute} />
+        {/* <DriverRouteViewModal open={showRouteViewModal} onOpenChange={setShowRouteViewModal} route={currentRoute} /> */}
 
-        <DriverWithdrawalModal
+        {/* <DriverWithdrawalModal
           open={showWithdrawalModal}
           onOpenChange={setShowWithdrawalModal}
           currentEarnings={dailyEarnings}
           driverId={driver.id}
           onWithdrawalComplete={handleWithdrawal}
-        />
+        /> */}
 
-        <DriverRouteMapModal open={showRouteMapModal} onOpenChange={setShowRouteMapModal} route={currentRoute} />
+        {/* <DriverRouteMapModal open={showRouteMapModal} onOpenChange={setShowRouteMapModal} route={currentRoute} /> */}
       </div>
-    </DriverProtectedRoute>
+    // </DriverProtectedRoute>
   )
 }
 
