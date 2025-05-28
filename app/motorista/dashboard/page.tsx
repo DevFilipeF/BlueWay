@@ -239,16 +239,16 @@ export default function DriverDashboard() {
     const earning = 8.5
     setDailyEarnings((prev) => prev + earning)
 
-    if (typeof window !== "undefined") {
-      const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
-      earningsHistory.unshift({
-        amount: earning,
-        description: "Passageiro desembarcado",
-        date: new Date().toLocaleDateString("pt-BR"),
-        time: new Date().toLocaleTimeString("pt-BR"),
-      })
-      localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
-    }
+    if (typeof window === "undefined") return;
+
+    const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
+    earningsHistory.unshift({
+      amount: earning,
+      description: "Passageiro desembarcado",
+      date: new Date().toLocaleDateString("pt-BR"),
+      time: new Date().toLocaleTimeString("pt-BR"),
+    })
+    localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
 
     setTimeout(() => {
       const newPassengers = generateNewPassengers()
@@ -263,6 +263,7 @@ export default function DriverDashboard() {
   }
 
   const handleToggleStatus = () => {
+    if (typeof window === "undefined") return;
     if (driver) {
       const newStatus = driver.status === "online" ? "offline" : "online"
       updateStatus(newStatus)
@@ -271,18 +272,21 @@ export default function DriverDashboard() {
   }
 
   const handleSendMessage = () => {
+    if (typeof window === "undefined") return;
     if (!chatMessage.trim() || !selectedPassenger) return
     showSuccess(`Mensagem enviada para ${selectedPassenger.name}`)
     setChatMessage("")
   }
 
   const markNotificationAsRead = (notificationId: string) => {
+    if (typeof window === "undefined") return;
     if (driver) {
       realTimeService.markNotificationAsRead(driver.id, notificationId)
     }
   }
 
   const showSuccess = (message: string) => {
+    if (typeof window === "undefined") return;
     setSuccessMessage(message)
     setTimeout(() => setSuccessMessage(""), 2000)
   }
