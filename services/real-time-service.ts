@@ -61,12 +61,32 @@ export interface LiveTrip {
   export class RealTimeService {
     private static instance: RealTimeService
     private listeners: Map<string, (data: any) => void> = new Map()
+    private isClient: boolean
+  
+    constructor() {
+      this.isClient = typeof window !== "undefined"
+    }
   
     static getInstance(): RealTimeService {
       if (!RealTimeService.instance) {
         RealTimeService.instance = new RealTimeService()
       }
       return RealTimeService.instance
+    }
+  
+    private getStorageItem(key: string): string | null {
+      if (!this.isClient) return null
+      return localStorage.getItem(key)
+    }
+  
+    private setStorageItem(key: string, value: string): void {
+      if (!this.isClient) return
+      localStorage.setItem(key, value)
+    }
+  
+    private removeStorageItem(key: string): void {
+      if (!this.isClient) return
+      localStorage.removeItem(key)
     }
   
     // Motorista inicia uma viagem
@@ -77,17 +97,17 @@ export interface LiveTrip {
         driverName: driverData.name,
         driverPhone: driverData.phone,
         vehicle: driverData.vehicle,
-        route: route || "Linha 1 - Paulista-Moema", // Usar rota real como padrão
+        route: route || "Linha 1 - Paulista-Moema",
         status: "waiting_passengers",
         currentLocation: {
-          lat: -23.563, // Começar na Av. Paulista
+          lat: -23.563,
           lng: -46.6543,
         },
         passengers: [],
         startTime: new Date().toLocaleString("pt-BR"),
       }
   
-      localStorage.setItem("currentLiveTrip", JSON.stringify(trip))
+      this.setStorageItem("currentLiveTrip", JSON.stringify(trip))
       this.notifyListeners("trip_started", trip)
       return trip
     }
@@ -106,10 +126,9 @@ export interface LiveTrip {
       const currentTrip = this.getCurrentTrip()
       if (!currentTrip) return false
   
-      // Verificar se há capacidade disponível
       const availableCapacity = this.getAvailableCapacity()
       if (availableCapacity <= 0) {
-        return false // Van lotada
+        return false
       }
   
       const passenger: LivePassenger = {
@@ -126,9 +145,8 @@ export interface LiveTrip {
       }
   
       currentTrip.passengers.push(passenger)
-      localStorage.setItem("currentLiveTrip", JSON.stringify(currentTrip))
+      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
   
-      // Notificar motorista
       this.addDriverNotification(currentTrip.driverId, {
         type: "new_passenger",
         title: "Nova solicitação!",
@@ -155,11 +173,10 @@ export interface LiveTrip {
         currentTrip.status = "in_progress"
       }
   
-      localStorage.setItem("currentLiveTrip", JSON.stringify(currentTrip))
+      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
   
       const passenger = currentTrip.passengers[passengerIndex]
   
-      // Notificar motorista
       this.addDriverNotification(currentTrip.driverId, {
         type: "passenger_boarded",
         title: "Passageiro embarcou!",
@@ -181,11 +198,10 @@ export interface LiveTrip {
       currentTrip.passengers[passengerIndex].status = "dropped_off"
       currentTrip.passengers[passengerIndex].dropOffTime = new Date().toLocaleString("pt-BR")
   
-      localStorage.setItem("currentLiveTrip", JSON.stringify(currentTrip))
+      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
   
       const passenger = currentTrip.passengers[passengerIndex]
   
-      // Notificar motorista
       this.addDriverNotification(currentTrip.driverId, {
         type: "passenger_dropped",
         title: "Passageiro desembarcou!",
@@ -202,22 +218,20 @@ export interface LiveTrip {
       if (!currentTrip) return
   
       currentTrip.status = "completed"
-      localStorage.setItem("currentLiveTrip", JSON.stringify(currentTrip))
+      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
   
-      // Salvar no histórico
-      const tripHistory = JSON.parse(localStorage.getItem("tripHistory") || "[]")
+      const tripHistory = JSON.parse(this.getStorageItem("tripHistory") || "[]")
       tripHistory.unshift(currentTrip)
-      localStorage.setItem("tripHistory", JSON.stringify(tripHistory))
+      this.setStorageItem("tripHistory", JSON.stringify(tripHistory))
   
-      // Limpar viagem atual
-      localStorage.removeItem("currentLiveTrip")
+      this.removeStorageItem("currentLiveTrip")
   
       this.notifyListeners("trip_ended", currentTrip)
     }
   
     // Obter viagem atual
     getCurrentTrip(): LiveTrip | null {
-      const trip = localStorage.getItem("currentLiveTrip")
+      const trip = this.getStorageItem("currentLiveTrip")
       return trip ? JSON.parse(trip) : null
     }
   
@@ -227,7 +241,7 @@ export interface LiveTrip {
       if (!currentTrip) return
   
       currentTrip.currentLocation = { lat, lng }
-      localStorage.setItem("currentLiveTrip", JSON.stringify(currentTrip))
+      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
   
       this.notifyListeners("location_updated", { trip: currentTrip, location: { lat, lng } })
     }
@@ -243,23 +257,23 @@ export interface LiveTrip {
       }
   
       notifications.unshift(newNotification)
-      localStorage.setItem(`driver_notifications_${driverId}`, JSON.stringify(notifications.slice(0, 50))) // Manter apenas 50 notificações
+      this.setStorageItem(`driver_notifications_${driverId}`, JSON.stringify(notifications.slice(0, 50)))
   
       this.notifyListeners("driver_notification", newNotification)
     }
   
     getDriverNotifications(driverId: string): DriverNotification[] {
-      const notifications = localStorage.getItem(`driver_notifications_${driverId}`)
+      const notifications = this.getStorageItem(`driver_notifications_${driverId}`)
       return notifications ? JSON.parse(notifications) : []
     }
   
     markNotificationAsRead(driverId: string, notificationId: string): void {
       const notifications = this.getDriverNotifications(driverId)
-      const notification = notifications.find((n) => n.id === notificationId)
-      if (notification) {
-        notification.read = true
-        localStorage.setItem(`driver_notifications_${driverId}`, JSON.stringify(notifications))
-      }
+      const notificationIndex = notifications.findIndex((n) => n.id === notificationId)
+      if (notificationIndex === -1) return
+  
+      notifications[notificationIndex].read = true
+      this.setStorageItem(`driver_notifications_${driverId}`, JSON.stringify(notifications))
     }
   
     // Sistema de listeners para atualizações em tempo real
