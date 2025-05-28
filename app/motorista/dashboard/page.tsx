@@ -144,6 +144,7 @@ export default function DriverDashboard() {
   }, [driver])
 
   const playNotificationSound = () => {
+    if (typeof window === "undefined") return;
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
@@ -859,3 +860,5 @@ export default function DriverDashboard() {
     </DriverProtectedRoute>
   )
 }
+
+
