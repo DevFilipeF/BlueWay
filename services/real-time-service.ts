@@ -332,5 +332,14 @@ export interface LiveTrip {
     }
   }
   
-  export const realTimeService = RealTimeService.getInstance()
+  // Exportar uma função que retorna a instância ao invés da instância diretamente
+  export const getRealTimeService = () => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return RealTimeService.getInstance();
+  }
+  
+  // Manter a exportação da instância para compatibilidade, mas com uma verificação
+  export const realTimeService = typeof window === "undefined" ? null : RealTimeService.getInstance();
   

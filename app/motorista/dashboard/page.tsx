@@ -35,7 +35,7 @@ import {
   Map,
 } from "lucide-react"
 import {
-  realTimeService,
+  getRealTimeService,
   type LiveTrip,
   type DriverNotification,
 } from "@/services/real-time-service"
@@ -59,6 +59,7 @@ export default function DriverDashboard() {
   const [selectedPassenger, setSelectedPassenger] = useState<LivePassenger | null>(null)
   const [chatMessage, setChatMessage] = useState("")
   const [showNotifications, setShowNotifications] = useState(false)
+  const [realTimeService, setRealTimeService] = useState<any>(null)
 
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
@@ -84,6 +85,12 @@ export default function DriverDashboard() {
   // Estado para controlar a aba ativa
   const [activeTab, setActiveTab] = useState("waiting")
 
+  // Inicializar o realTimeService no lado do cliente
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setRealTimeService(getRealTimeService());
+  }, []);
+
   // Inicializar vanCapacity quando o driver estiver disponível
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -99,6 +106,7 @@ export default function DriverDashboard() {
   // Polling para atualizações em tempo real
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!realTimeService) return;
     
     const interval = setInterval(() => {
       if (driver) {
@@ -107,8 +115,8 @@ export default function DriverDashboard() {
 
         // Atualizar capacidade da van
         if (trip) {
-          const boardedCount = trip.passengers.filter((p) => p.status === "boarded").length
-          const waitingCount = trip.passengers.filter((p) => p.status === "waiting").length
+          const boardedCount = trip.passengers.filter((p: LivePassenger) => p.status === "boarded").length
+          const waitingCount = trip.passengers.filter((p: LivePassenger) => p.status === "waiting").length
           const totalOccupied = boardedCount + waitingCount
 
           setVanCapacity({
@@ -126,28 +134,28 @@ export default function DriverDashboard() {
 
         const driverNotifications = realTimeService.getDriverNotifications(driver.id)
         setNotifications(driverNotifications)
-        setUnreadCount(driverNotifications.filter((n) => !n.read).length)
+        setUnreadCount(driverNotifications.filter((n: DriverNotification) => !n.read).length)
       }
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [driver, currentRoute])
+  }, [driver, currentRoute, realTimeService])
 
   // Configurar listeners para eventos em tempo real
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!driver) return
+    if (!driver || !realTimeService) return
 
-    realTimeService.subscribe("passenger_requested", (data) => {
+    realTimeService.subscribe("passenger_requested", (data: { passenger: LivePassenger }) => {
       showSuccess(`Nova solicitação de ${data.passenger.name}!`)
       playNotificationSound()
     })
 
-    realTimeService.subscribe("passenger_boarded", (data) => {
+    realTimeService.subscribe("passenger_boarded", (data: { passenger: LivePassenger }) => {
       showSuccess(`${data.passenger.name} embarcou no veículo!`)
     })
 
-    realTimeService.subscribe("driver_notification", (notification) => {
+    realTimeService.subscribe("driver_notification", (notification: DriverNotification) => {
       showSuccess(notification.title)
     })
 
@@ -156,12 +164,17 @@ export default function DriverDashboard() {
       realTimeService.unsubscribe("passenger_boarded")
       realTimeService.unsubscribe("driver_notification")
     }
-  }, [driver])
+  }, [driver, realTimeService])
 
   const playNotificationSound = () => {
     if (typeof window === "undefined") return;
     
     try {
+      if (!window.AudioContext && !(window as any).webkitAudioContext) {
+        console.warn("AudioContext não suportado neste navegador");
+        return;
+      }
+
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
       const oscillator = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
@@ -181,7 +194,7 @@ export default function DriverDashboard() {
 
   const handleStartTrip = () => {
     if (typeof window === "undefined") return;
-    if (!driver) return
+    if (!driver || !realTimeService) return
 
     const trip = realTimeService.startTrip(driver.id, driver, currentRoute?.name || "Linha Centro-Shopping")
     setCurrentTrip(trip)
@@ -194,6 +207,8 @@ export default function DriverDashboard() {
 
   const handleEndTrip = () => {
     if (typeof window === "undefined") return;
+    if (!realTimeService) return;
+    
     realTimeService.endTrip()
     setCurrentTrip(null)
     setIsOnline(false)
@@ -203,6 +218,8 @@ export default function DriverDashboard() {
 
   const handleBoardPassenger = (passengerId: string) => {
     if (typeof window === "undefined") return;
+    if (!realTimeService) return;
+    
     realTimeService.boardPassenger(passengerId)
     showSuccess("Passageiro embarcado!")
   }
@@ -240,7 +257,7 @@ export default function DriverDashboard() {
   }
 
   const handleDropOffPassenger = (passengerId: string) => {
-    if (!driver) return
+    if (!driver || !realTimeService) return
     realTimeService.dropOffPassenger(passengerId)
 
     const earning = 8.5
@@ -287,9 +304,9 @@ export default function DriverDashboard() {
 
   const markNotificationAsRead = (notificationId: string) => {
     if (typeof window === "undefined") return;
-    if (driver) {
-      realTimeService.markNotificationAsRead(driver.id, notificationId)
-    }
+    if (!driver || !realTimeService) return;
+    
+    realTimeService.markNotificationAsRead(driver.id, notificationId)
   }
 
   const showSuccess = (message: string) => {
