@@ -38,10 +38,12 @@ export default function PagamentosPage() {
   }
 
   const handlePrintReceipt = () => {
+    if (typeof window === "undefined") return;
     window.print()
   }
 
   const handleDownloadReceipt = () => {
+    if (typeof window === "undefined") return;
     // Simulação de download - em uma aplicação real, isso geraria um PDF
     alert("Recibo baixado com sucesso!")
     setReceiptOpen(false)

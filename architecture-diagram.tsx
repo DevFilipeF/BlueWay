@@ -6,7 +6,7 @@ export default function ArchitectureDiagram() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current || typeof window === "undefined") return
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")

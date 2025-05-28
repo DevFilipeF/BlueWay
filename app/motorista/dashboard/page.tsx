@@ -145,18 +145,23 @@ export default function DriverDashboard() {
 
   const playNotificationSound = () => {
     if (typeof window === "undefined") return;
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
 
-    oscillator.frequency.value = 800
-    gainNode.gain.value = 0.1
+      oscillator.frequency.value = 800
+      gainNode.gain.value = 0.1
 
-    oscillator.start()
-    oscillator.stop(audioContext.currentTime + 0.2)
+      oscillator.start()
+      oscillator.stop(audioContext.currentTime + 0.2)
+    } catch (error) {
+      console.error("Erro ao tocar som de notificação:", error)
+    }
   }
 
   const handleStartTrip = () => {
