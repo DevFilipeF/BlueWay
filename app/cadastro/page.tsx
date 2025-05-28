@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
-import { MapPin, AlertCircle, ArrowLeft, Apple, Facebook } from "lucide-react"
+import { AlertCircle, ArrowLeft, Apple, Facebook, Car } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { Separator } from "@/components/ui/separator"
 
@@ -66,21 +66,28 @@ export default function CadastroPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Header */}
-      <div className="p-4 flex items-center">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="mr-2">
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
-        <h1 className="text-xl font-semibold">Criar conta</h1>
+      {/* Header com fundo azul claro */}
+      <div className="relative h-48 bg-gradient-to-br from-blue-400 to-blue-500 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-between px-4 z-10">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-white hover:bg-blue-600">
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <div className="text-center text-white">
+            <div className="flex items-center justify-center gap-2 text-xl font-bold mb-1">
+              <Image src="/logo-blueway.png" alt="BlueWay Logo" width={40} height={40} />
+              <Car className="h-6 w-6" />
+              <span className="drop-shadow-lg">BlueWay</span>
+            </div>
+            <p className="text-sm drop-shadow-md">Cadastro de Usuário</p>
+          </div>
+          <div className="w-10"></div> {/* Spacer para centralizar */}
+        </div>
       </div>
 
       {/* Form */}
       <div className="flex-1 px-6 py-4">
         <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center gap-2 text-2xl font-bold mb-6">
-          <Image src="/logo-blueway.png" alt="BlueWay Logo" width={60} height={60} />
-            <span>BlueWay</span>
-          </div>
+          <h1 className="text-2xl font-bold mb-6">Crie sua conta</h1>
 
           {error && (
             <Alert variant="destructive" className="mb-6">
@@ -206,16 +213,16 @@ export default function CadastroPage() {
               </Link>
             </p>
           </div>
-        </div>
-      </div>
 
-      <div className="mt-4 text-center">
-        <p className="text-muted-foreground">
-        Quer ser motorista?{" "}
-        <Link href="/motorista/cadastro" className="text-blue-600 font-medium hover:underline">
-        Cadastre-se como motorista
-        </Link>
-        </p>
+          <div className="mt-4 text-center">
+            <p className="text-muted-foreground">
+              Quer ser motorista?{" "}
+              <Link href="/motorista/cadastro" className="text-blue-600 font-medium hover:underline">
+                Cadastre-se como motorista
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

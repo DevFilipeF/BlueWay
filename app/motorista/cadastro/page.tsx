@@ -73,23 +73,27 @@ export default function DriverRegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Header */}
-      <div className="p-4 flex items-center bg-blue-600 text-white">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="mr-2 text-white hover:bg-blue-700">
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
-        <h1 className="text-xl font-semibold">Cadastro de Motorista</h1>
+      {/* Header com fundo azul claro */}
+      <div className="relative h-48 bg-gradient-to-br from-blue-400 to-blue-500 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-between px-4 z-10">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-white hover:bg-blue-600">
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <div className="text-center text-white">
+            <div className="flex items-center justify-center gap-2 text-xl font-bold mb-1">
+              <Image src="/logo-blueway.png" alt="BlueWay Logo" width={40} height={40} />
+              <Truck className="h-6 w-6" />
+              <span className="drop-shadow-lg">BlueWay Driver</span>
+            </div>
+            <p className="text-sm drop-shadow-md">Cadastro de Motorista</p>
+          </div>
+          <div className="w-10"></div> {/* Spacer para centralizar */}
+        </div>
       </div>
 
       {/* Form */}
       <div className="flex-1 px-6 py-4">
         <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center gap-2 text-2xl font-bold mb-6">
-            <Image src="/logo-blueway.png" alt="BlueWay Logo" width={60} height={60} />
-            <Truck className="h-8 w-8 text-blue-600" />
-            <span>BlueWay Driver</span>
-          </div>
-
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />

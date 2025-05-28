@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
-import { MapPin, AlertCircle, Apple, Facebook } from "lucide-react"
+import { AlertCircle, Apple, Facebook, Car } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { Separator } from "@/components/ui/separator"
 
@@ -58,19 +58,16 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Hero Section */}
-      <div className="relative h-64 bg-black">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-50"
-          style={{ backgroundImage: "url('/placeholder.svg?height=400&width=800&text=MobiComunidade')" }}
-        ></div>
+      {/* Hero Section com fundo azul claro */}
+      <div className="relative h-64 bg-gradient-to-br from-blue-400 to-blue-500 overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white">
-            <div className="flex items-center justify-center gap-2 text-3xl font-bold mb-2">
+          <div className="text-center text-white relative z-10">
+            <div className="flex items-center justify-center gap-3 text-3xl font-bold mb-2">
               <Image src="/logo-blueway.png" alt="BlueWay Logo" width={80} height={80} />
-              <span>BlueWay</span>
+              <Car className="h-10 w-10" />
+              <span className="drop-shadow-lg">BlueWay</span>
             </div>
-            <p className="text-lg">Transporte comunitário acessível</p>
+            <p className="text-lg drop-shadow-md">Transporte comunitário acessível</p>
           </div>
         </div>
       </div>
@@ -178,17 +175,17 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-muted-foreground">
+              É motorista?{" "}
+              <Link href="/motorista/login" className="text-blue-600 font-medium hover:underline">
+                Acesse a área do motorista
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
-
-      <div className="mt-4 text-center">
-        <p className="text-muted-foreground">
-        É motorista?{" "}
-        <Link href="/motorista/login" className="text-blue-600  font-medium hover:underline">
-        Acesse a área do motorista
-        </Link>
-        </p>
-        </div>
     </div>
   )
 }

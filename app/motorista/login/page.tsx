@@ -37,20 +37,16 @@ export default function DriverLoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {/* Hero Section */}
-      <div className="relative h-64 bg-gradient-to-r from-blue-600 to-blue-800">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: "url('/placeholder.svg?height=400&width=800&text=BlueWay Driver')" }}
-        ></div>
+      {/* Hero Section com fundo azul claro */}
+      <div className="relative h-64 bg-gradient-to-br from-blue-400 to-blue-500 overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white">
+          <div className="text-center text-white relative z-10">
             <div className="flex items-center justify-center gap-3 text-3xl font-bold mb-2">
               <Image src="/logo-blueway.png" alt="BlueWay Logo" width={80} height={80} />
               <Truck className="h-10 w-10" />
-              <span>BlueWay Driver</span>
+              <span className="drop-shadow-lg">BlueWay Driver</span>
             </div>
-            <p className="text-lg">Portal do Motorista</p>
+            <p className="text-lg drop-shadow-md">Portal do Motorista</p>
           </div>
         </div>
       </div>

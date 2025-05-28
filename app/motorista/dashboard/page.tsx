@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { type VanRoute } from "@/services/stop-points-service"
+import { type LivePassenger } from "@/services/real-time-service"
 import {
   MapPin,
   CheckCircle,
@@ -30,14 +32,13 @@ import {
   UserPlus,
   Play,
   Square,
+  Map,
 } from "lucide-react"
 import {
   realTimeService,
   type LiveTrip,
-  type LivePassenger,
   type DriverNotification,
 } from "@/services/real-time-service"
-import { type VanRoute } from "@/services/stop-points-service"
 import { DriverProtectedRoute } from "@/components/driver-protected-route"
 import { DriverSettingsModal } from "@/components/driver-settings-modal"
 import { DriverHistoryModal } from "@/components/driver-history-modal"
@@ -46,6 +47,7 @@ import { DriverRouteConfigModal } from "@/components/driver-route-config-modal"
 import { DriverRouteViewModal } from "@/components/driver-route-view-modal"
 import { DriverWithdrawalModal } from "@/components/driver-withdrawal-modal"
 import { DriverRouteMapModal } from "@/components/driver-route-map-modal"
+import { LeafletMap } from "@/components/leaflet-map"
 
 export default function DriverDashboard() {
   const { driver, updateStatus, logout, updateDriver } = useDriverAuth()
@@ -70,6 +72,7 @@ export default function DriverDashboard() {
 
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false)
   const [showRouteMapModal, setShowRouteMapModal] = useState(false)
+  const [showMapView, setShowMapView] = useState(false)
 
   // Adicionar estado para controlar capacidade
   const [vanCapacity, setVanCapacity] = useState({
@@ -114,7 +117,7 @@ export default function DriverDashboard() {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [driver])
+  }, [driver, currentRoute])
 
   // Configurar listeners para eventos em tempo real
   useEffect(() => {
@@ -387,6 +390,64 @@ export default function DriverDashboard() {
   const boardedPassengers = currentTrip?.passengers.filter((p) => p.status === "boarded") || []
   const completedPassengers = currentTrip?.passengers.filter((p) => p.status === "dropped_off") || []
 
+  // Se estiver mostrando o mapa, renderizar apenas o mapa
+  if (showMapView) {
+    return (
+      <DriverProtectedRoute>
+        <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+          {/* Header do Mapa */}
+          <div className="bg-white shadow-sm border-b px-4 py-3 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm" onClick={() => setShowMapView(false)}>
+                  ← Voltar
+                </Button>
+                <div>
+                  <h1 className="text-lg font-semibold">Mapa da Rota</h1>
+                  <p className="text-sm text-muted-foreground">
+                    {currentRoute ? currentRoute.name : "Visualização da rota"}
+                  </p>
+                </div>
+              </div>
+              <Badge className={currentTrip ? "bg-green-600" : "bg-gray-600"}>
+                {currentTrip ? "Viagem Ativa" : "Visualização"}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Mapa */}
+          <div className="flex-1 p-4">
+            <LeafletMap
+              userLocation={[-23.563, -46.6543]}
+              selectedRoute={currentRoute}
+              rideStage={currentTrip ? "journey" : ""}
+            />
+          </div>
+
+          {/* Info da viagem no mapa */}
+          {currentTrip && (
+            <div className="bg-white border-t p-4 flex-shrink-0">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-bold text-blue-600">{waitingPassengers.length}</div>
+                  <div className="text-xs text-muted-foreground">Aguardando</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-green-600">{boardedPassengers.length}</div>
+                  <div className="text-xs text-muted-foreground">Embarcados</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-orange-600">R$ {dailyEarnings.toFixed(0)}</div>
+                  <div className="text-xs text-muted-foreground">Ganhos</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </DriverProtectedRoute>
+    )
+  }
+
   return (
     <DriverProtectedRoute>
       <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
@@ -416,6 +477,13 @@ export default function DriverDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Botão do Mapa */}
+              {(currentRoute || currentTrip) && (
+                <Button variant="outline" size="sm" onClick={() => setShowMapView(true)} className="h-8 w-8 p-0">
+                  <Map className="h-4 w-4" />
+                </Button>
+              )}
+
               {/* Notificações */}
               <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
                 <DropdownMenuTrigger asChild>

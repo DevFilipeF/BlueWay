@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export interface Driver {
   id: string
@@ -48,6 +49,7 @@ const DriverAuthContext = createContext<DriverAuthContextType | undefined>(undef
 export function DriverAuthProvider({ children }: { children: React.ReactNode }) {
   const [driver, setDriver] = useState<Driver | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     // Verificar se há um motorista logado no localStorage
@@ -128,6 +130,8 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
   const logout = () => {
     setDriver(null)
     localStorage.removeItem("blueWayDriver")
+    // Redirecionar para a tela de login
+    router.push("/motorista/login")
   }
 
   const updateStatus = (status: "online" | "offline" | "busy") => {
