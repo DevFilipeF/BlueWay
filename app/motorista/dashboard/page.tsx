@@ -86,6 +86,7 @@ export default function DriverDashboard() {
 
   // Inicializar vanCapacity quando o driver estiver disponível
   useEffect(() => {
+    if (typeof window === "undefined") return;
     if (driver?.vehicle?.capacity) {
       setVanCapacity({
         total: driver.vehicle.capacity,
@@ -97,6 +98,8 @@ export default function DriverDashboard() {
 
   // Polling para atualizações em tempo real
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     const interval = setInterval(() => {
       if (driver) {
         const trip = realTimeService.getCurrentTrip()
@@ -132,6 +135,7 @@ export default function DriverDashboard() {
 
   // Configurar listeners para eventos em tempo real
   useEffect(() => {
+    if (typeof window === "undefined") return;
     if (!driver) return
 
     realTimeService.subscribe("passenger_requested", (data) => {
@@ -176,6 +180,7 @@ export default function DriverDashboard() {
   }
 
   const handleStartTrip = () => {
+    if (typeof window === "undefined") return;
     if (!driver) return
 
     const trip = realTimeService.startTrip(driver.id, driver, currentRoute?.name || "Linha Centro-Shopping")
@@ -188,6 +193,7 @@ export default function DriverDashboard() {
   }
 
   const handleEndTrip = () => {
+    if (typeof window === "undefined") return;
     realTimeService.endTrip()
     setCurrentTrip(null)
     setIsOnline(false)
@@ -196,6 +202,7 @@ export default function DriverDashboard() {
   }
 
   const handleBoardPassenger = (passengerId: string) => {
+    if (typeof window === "undefined") return;
     realTimeService.boardPassenger(passengerId)
     showSuccess("Passageiro embarcado!")
   }
