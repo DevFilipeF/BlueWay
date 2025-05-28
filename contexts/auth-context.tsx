@@ -30,6 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Verificar se o usuário está logado ao carregar a página
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     const storedUser = localStorage.getItem("mobiUser")
     if (storedUser) {
       setUser(JSON.parse(storedUser))
@@ -39,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função de login
   const login = async (email: string, password: string): Promise<boolean> => {
+    if (typeof window === "undefined") return false;
+    
     setIsLoading(true)
 
     try {
@@ -70,6 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função de login com redes sociais
   const loginWithSocial = async (provider: "google" | "apple" | "facebook"): Promise<boolean> => {
+    if (typeof window === "undefined") return false;
+    
     setIsLoading(true)
 
     try {
@@ -111,6 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função de registro
   const register = async (name: string, email: string, phone: string, password: string): Promise<boolean> => {
+    if (typeof window === "undefined") return false;
+    
     setIsLoading(true)
 
     try {
@@ -154,6 +162,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função de logout
   const logout = () => {
+    if (typeof window === "undefined") return;
+    
     setUser(null)
     localStorage.removeItem("mobiUser")
     router.push("/login")

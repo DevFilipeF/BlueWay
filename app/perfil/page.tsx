@@ -34,6 +34,8 @@ export default function PerfilPage() {
   }, [user])
 
   const handleSave = () => {
+    if (typeof window === "undefined") return;
+    
     // Simular salvamento
     setIsSaving(true)
 

@@ -304,14 +304,17 @@ export default function DriverDashboard() {
 
   const handleWithdrawal = (amount: number, method: string, details: any) => {
     if (typeof window === "undefined") return;
-    if (!driver) return;
+    
+    if (!driver) return
 
     const withdrawal = {
+      id: `withdrawal_${Date.now()}`,
       amount,
       method,
       details,
       date: new Date().toLocaleDateString("pt-BR"),
       time: new Date().toLocaleTimeString("pt-BR"),
+      status: "completed",
     }
 
     const withdrawals = JSON.parse(localStorage.getItem(`driver_withdrawals_${driver.id}`) || "[]")

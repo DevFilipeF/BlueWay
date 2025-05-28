@@ -34,6 +34,8 @@ export function DriverHistoryModal({ open, onOpenChange, driverId }: DriverHisto
   const [earnings, setEarnings] = useState<Earning[]>([])
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     if (open && driverId) {
       // Carregar histórico de viagens
       const trips = JSON.parse(localStorage.getItem(`driver_trips_${driverId}`) || "[]")

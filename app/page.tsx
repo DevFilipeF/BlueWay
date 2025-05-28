@@ -161,10 +161,12 @@ export default function Home() {
                       setRideStage("complete")
 
                       // Atualizar o status da viagem para "Concluída"
-                      const trips = JSON.parse(localStorage.getItem("mobiTrips") || "[]")
-                      if (trips.length > 0) {
-                        trips[0].status = "Concluída"
-                        localStorage.setItem("mobiTrips", JSON.stringify(trips))
+                      if (typeof window !== "undefined") {
+                        const trips = JSON.parse(localStorage.getItem("mobiTrips") || "[]")
+                        if (trips.length > 0) {
+                          trips[0].status = "Concluída"
+                          localStorage.setItem("mobiTrips", JSON.stringify(trips))
+                        }
                       }
                     }, 5000)
 

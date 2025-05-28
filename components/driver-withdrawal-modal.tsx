@@ -39,6 +39,8 @@ export function DriverWithdrawalModal({
   const [transactionId, setTransactionId] = useState("")
 
   const handleWithdraw = async () => {
+    if (typeof window === "undefined") return;
+    
     setIsProcessing(true)
 
     // Simular processamento
@@ -103,6 +105,7 @@ export function DriverWithdrawalModal({
   }
 
   const copyTransactionId = () => {
+    if (typeof window === "undefined") return;
     navigator.clipboard.writeText(transactionId)
   }
 
