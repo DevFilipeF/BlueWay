@@ -28,6 +28,8 @@ export function DriverSettingsModal({ open, onOpenChange, driver, onUpdateDriver
   })
 
   const handleSave = () => {
+    if (typeof window === "undefined") return;
+    
     // Salvar configurações no localStorage
     localStorage.setItem(`driver_settings_${driver.id}`, JSON.stringify(settings))
     onOpenChange(false)

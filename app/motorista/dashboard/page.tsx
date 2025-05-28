@@ -303,22 +303,23 @@ export default function DriverDashboard() {
   }
 
   const handleWithdrawal = (amount: number, method: string, details: any) => {
-    if (!driver) return
-    setDailyEarnings(0)
+    if (typeof window === "undefined") return;
+    if (!driver) return;
 
-    if (typeof window !== "undefined") {
-      const earningsHistory = JSON.parse(localStorage.getItem(`driver_earnings_${driver.id}`) || "[]")
-      earningsHistory.unshift({
-        amount: -amount,
-        description: `Saque via ${method === "pix" ? "PIX" : "Transferência Bancária"}`,
-        date: new Date().toLocaleDateString("pt-BR"),
-        time: new Date().toLocaleTimeString("pt-BR"),
-        transactionId: details.transactionId,
-      })
-      localStorage.setItem(`driver_earnings_${driver.id}`, JSON.stringify(earningsHistory))
+    const withdrawal = {
+      amount,
+      method,
+      details,
+      date: new Date().toLocaleDateString("pt-BR"),
+      time: new Date().toLocaleTimeString("pt-BR"),
     }
 
-    showSuccess(`Saque realizado!`)
+    const withdrawals = JSON.parse(localStorage.getItem(`driver_withdrawals_${driver.id}`) || "[]")
+    withdrawals.unshift(withdrawal)
+    localStorage.setItem(`driver_withdrawals_${driver.id}`, JSON.stringify(withdrawals))
+
+    setDailyEarnings((prev) => Math.max(0, prev - amount))
+    showSuccess("Saque realizado com sucesso!")
   }
 
   // Função compacta para renderizar card de passageiro

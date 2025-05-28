@@ -52,6 +52,8 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
   const router = useRouter()
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     // Verificar se há um motorista logado no localStorage
     const savedDriver = localStorage.getItem("blueWayDriver")
     if (savedDriver) {
@@ -60,6 +62,8 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    if (typeof window === "undefined") return false;
+    
     setIsLoading(true)
 
     try {
@@ -84,6 +88,8 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
   }
 
   const register = async (data: RegisterData): Promise<boolean> => {
+    if (typeof window === "undefined") return false;
+    
     setIsLoading(true)
 
     try {
@@ -128,6 +134,8 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
   }
 
   const logout = () => {
+    if (typeof window === "undefined") return;
+    
     setDriver(null)
     localStorage.removeItem("blueWayDriver")
     // Redirecionar para a tela de login
@@ -135,29 +143,31 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
   }
 
   const updateStatus = (status: "online" | "offline" | "busy") => {
-    if (driver) {
-      const updatedDriver = { ...driver, status }
-      setDriver(updatedDriver)
-      localStorage.setItem("blueWayDriver", JSON.stringify(updatedDriver))
+    if (typeof window === "undefined") return;
+    if (!driver) return;
+    
+    const updatedDriver = { ...driver, status }
+    setDriver(updatedDriver)
+    localStorage.setItem("blueWayDriver", JSON.stringify(updatedDriver))
 
-      // Atualizar também na lista de motoristas
-      const drivers = JSON.parse(localStorage.getItem("blueWayDrivers") || "[]")
-      const updatedDrivers = drivers.map((d: any) => (d.id === driver.id ? { ...d, status } : d))
-      localStorage.setItem("blueWayDrivers", JSON.stringify(updatedDrivers))
-    }
+    // Atualizar também na lista de motoristas
+    const drivers = JSON.parse(localStorage.getItem("blueWayDrivers") || "[]")
+    const updatedDrivers = drivers.map((d: any) => (d.id === driver.id ? { ...d, status } : d))
+    localStorage.setItem("blueWayDrivers", JSON.stringify(updatedDrivers))
   }
 
   const updateDriver = (updates: Partial<Driver>) => {
-    if (driver) {
-      const updatedDriver = { ...driver, ...updates }
-      setDriver(updatedDriver)
-      localStorage.setItem("blueWayDriver", JSON.stringify(updatedDriver))
+    if (typeof window === "undefined") return;
+    if (!driver) return;
+    
+    const updatedDriver = { ...driver, ...updates }
+    setDriver(updatedDriver)
+    localStorage.setItem("blueWayDriver", JSON.stringify(updatedDriver))
 
-      // Atualizar também na lista de motoristas
-      const drivers = JSON.parse(localStorage.getItem("blueWayDrivers") || "[]")
-      const updatedDrivers = drivers.map((d: any) => (d.id === driver.id ? { ...d, ...updates } : d))
-      localStorage.setItem("blueWayDrivers", JSON.stringify(updatedDrivers))
-    }
+    // Atualizar também na lista de motoristas
+    const drivers = JSON.parse(localStorage.getItem("blueWayDrivers") || "[]")
+    const updatedDrivers = drivers.map((d: any) => (d.id === driver.id ? { ...d, ...updates } : d))
+    localStorage.setItem("blueWayDrivers", JSON.stringify(updatedDrivers))
   }
 
   return (
