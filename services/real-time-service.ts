@@ -60,11 +60,20 @@ export interface LiveTrip {
   // Serviço de viagens ao vivo
   export class RealTimeService {
     private static instance: RealTimeService
-    private listeners: Map<string, (data: any) => void> = new Map()
-    private isClient: boolean
+    private listeners: { [key: string]: Function[] } = {}
+    private storage: Storage | {
+      getItem: () => null
+      setItem: () => void
+      removeItem: () => void
+    }
   
-    constructor() {
-      this.isClient = typeof window !== "undefined"
+    private constructor() {
+      this.storage = typeof window !== 'undefined' ? window.localStorage : {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {}
+      }
+      console.log("RealTimeService inicializado")
     }
   
     static getInstance(): RealTimeService {
@@ -74,23 +83,9 @@ export interface LiveTrip {
       return RealTimeService.instance
     }
   
-    private getStorageItem(key: string): string | null {
-      if (!this.isClient) return null
-      return localStorage.getItem(key)
-    }
-  
-    private setStorageItem(key: string, value: string): void {
-      if (!this.isClient) return
-      localStorage.setItem(key, value)
-    }
-  
-    private removeStorageItem(key: string): void {
-      if (!this.isClient) return
-      localStorage.removeItem(key)
-    }
-  
     // Motorista inicia uma viagem
     startTrip(driverId: string, driverData: any, route: string): LiveTrip {
+      console.log("Iniciando viagem com:", { driverId, driverData, route })
       const trip: LiveTrip = {
         id: `live_trip_${Date.now()}`,
         driverId,
@@ -109,229 +104,120 @@ export interface LiveTrip {
   
       this.setStorageItem("currentLiveTrip", JSON.stringify(trip))
       this.notifyListeners("trip_started", trip)
+      console.log("Viagem iniciada com sucesso:", trip)
       return trip
     }
   
-    // Adicionar método para verificar capacidade disponível
-    getAvailableCapacity(): number {
+    // Solicitar uma corrida
+    requestRide(passenger: LivePassenger): boolean {
+      console.log("Solicitando corrida para:", passenger)
       const currentTrip = this.getCurrentTrip()
-      if (!currentTrip) return 0
-  
-      const boardedPassengers = currentTrip.passengers.filter((p) => p.status === "boarded").length
-      return currentTrip.vehicle.capacity - boardedPassengers
-    }
-  
-    // Passageiro solicita embarque
-    requestRide(passengerData: any): boolean {
-      const currentTrip = this.getCurrentTrip()
-      if (!currentTrip) return false
-  
-      const availableCapacity = this.getAvailableCapacity()
-      if (availableCapacity <= 0) {
+      if (!currentTrip) {
+        console.error("Nenhuma viagem ativa encontrada")
         return false
       }
   
-      const passenger: LivePassenger = {
-        id: `passenger_${Date.now()}`,
-        name: passengerData.name,
-        phone: passengerData.phone,
-        origin: passengerData.origin,
-        destination: passengerData.destination,
-        status: "waiting",
-        paymentStatus: passengerData.paymentStatus || "paid",
-        paymentMethod: passengerData.paymentMethod,
-        amount: passengerData.amount,
-        requestTime: new Date().toLocaleString("pt-BR"),
+      if (currentTrip.status !== "waiting_passengers") {
+        console.error("Viagem não está aceitando passageiros")
+        return false
       }
   
-      currentTrip.passengers.push(passenger)
-      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
+      // Verificar capacidade
+      const boardedCount = currentTrip.passengers.filter(p => p.status === "boarded").length
+      const waitingCount = currentTrip.passengers.filter(p => p.status === "waiting").length
+      const totalOccupied = boardedCount + waitingCount
   
-      this.addDriverNotification(currentTrip.driverId, {
-        type: "new_passenger",
-        title: "Nova solicitação!",
-        message: `${passenger.name} solicitou embarque de ${passenger.origin} para ${passenger.destination}`,
-        passengerId: passenger.id,
+      if (totalOccupied >= currentTrip.vehicle.capacity) {
+        console.error("Van lotada")
+        return false
+      }
+  
+      // Adicionar passageiro à viagem
+      currentTrip.passengers.push({
+        ...passenger,
+        id: `passenger_${Date.now()}`,
+        status: "waiting",
+        requestTime: new Date().toLocaleString("pt-BR")
       })
   
-      this.notifyListeners("passenger_requested", { trip: currentTrip, passenger })
+      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
+      this.notifyListeners("passenger_requested", { passenger })
+      console.log("Corrida solicitada com sucesso")
       return true
     }
   
-    // Passageiro embarca
-    boardPassenger(driverId: string, passengerId: string): void {
+    // Verificar se pode aceitar mais passageiros
+    canAcceptMorePassengers(): boolean {
       const currentTrip = this.getCurrentTrip()
-      if (!currentTrip || currentTrip.driverId !== driverId) {
-        console.error("Viagem não encontrada ou motorista não autorizado");
-        return;
-      }
-
-      const passengerIndex = currentTrip.passengers.findIndex((p) => p.id === passengerId)
-      if (passengerIndex === -1) {
-        console.error("Passageiro não encontrado");
-        return;
-      }
-
-      currentTrip.passengers[passengerIndex].status = "boarded"
-      currentTrip.passengers[passengerIndex].boardingTime = new Date().toLocaleString("pt-BR")
-
-      if (currentTrip.status === "waiting_passengers") {
-        currentTrip.status = "in_progress"
-      }
-
-      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
-
-      const passenger = currentTrip.passengers[passengerIndex]
-
-      this.addDriverNotification(currentTrip.driverId, {
-        type: "passenger_boarded",
-        title: "Passageiro embarcou!",
-        message: `${passenger.name} embarcou no veículo`,
-        passengerId: passenger.id,
-      })
-
-      this.notifyListeners("passenger_boarded", { trip: currentTrip, passenger })
-    }
+      if (!currentTrip) return false
   
-    // Passageiro desembarca
-    dropOffPassenger(passengerId: string): void {
-      const currentTrip = this.getCurrentTrip()
-      if (!currentTrip) return
+      const boardedCount = currentTrip.passengers.filter(p => p.status === "boarded").length
+      const waitingCount = currentTrip.passengers.filter(p => p.status === "waiting").length
+      const totalOccupied = boardedCount + waitingCount
   
-      const passengerIndex = currentTrip.passengers.findIndex((p) => p.id === passengerId)
-      if (passengerIndex === -1) return
-  
-      currentTrip.passengers[passengerIndex].status = "dropped_off"
-      currentTrip.passengers[passengerIndex].dropOffTime = new Date().toLocaleString("pt-BR")
-  
-      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
-  
-      const passenger = currentTrip.passengers[passengerIndex]
-  
-      this.addDriverNotification(currentTrip.driverId, {
-        type: "passenger_dropped",
-        title: "Passageiro desembarcou!",
-        message: `${passenger.name} desembarcou no destino`,
-        passengerId: passenger.id,
-      })
-  
-      this.notifyListeners("passenger_dropped", { trip: currentTrip, passenger })
-    }
-  
-    // Finalizar viagem
-    endTrip(driverId: string): void {
-      const currentTrip = this.getCurrentTrip()
-      if (!currentTrip || currentTrip.driverId !== driverId) {
-        console.error("Viagem não encontrada ou motorista não autorizado");
-        return;
-      }
-
-      currentTrip.status = "completed"
-      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
-      this.notifyListeners("trip_ended", currentTrip)
-      this.removeStorageItem("currentLiveTrip")
+      return totalOccupied < currentTrip.vehicle.capacity
     }
   
     // Obter viagem atual
     getCurrentTrip(): LiveTrip | null {
-      const trip = this.getStorageItem("currentLiveTrip")
-      return trip ? JSON.parse(trip) : null
-    }
-  
-    // Atualizar localização do motorista
-    updateDriverLocation(lat: number, lng: number): void {
-      const currentTrip = this.getCurrentTrip()
-      if (!currentTrip) return
-  
-      currentTrip.currentLocation = { lat, lng }
-      this.setStorageItem("currentLiveTrip", JSON.stringify(currentTrip))
-  
-      this.notifyListeners("location_updated", { trip: currentTrip, location: { lat, lng } })
-    }
-  
-    // Sistema de notificações para motorista
-    addDriverNotification(driverId: string, notification: Omit<DriverNotification, "id" | "timestamp" | "read">): void {
-      const notifications = this.getDriverNotifications(driverId)
-      const newNotification: DriverNotification = {
-        ...notification,
-        id: `notif_${Date.now()}`,
-        timestamp: new Date().toLocaleString("pt-BR"),
-        read: false,
+      const tripData = this.getStorageItem("currentLiveTrip")
+      if (!tripData) return null
+      try {
+        return JSON.parse(tripData)
+      } catch (error) {
+        console.error("Erro ao parsear viagem:", error)
+        return null
       }
-  
-      notifications.unshift(newNotification)
-      this.setStorageItem(`driver_notifications_${driverId}`, JSON.stringify(notifications.slice(0, 50)))
-  
-      this.notifyListeners("driver_notification", newNotification)
     }
   
-    getDriverNotifications(driverId: string): DriverNotification[] {
-      const notifications = this.getStorageItem(`driver_notifications_${driverId}`)
-      return notifications ? JSON.parse(notifications) : []
+    // Métodos auxiliares
+    private setStorageItem(key: string, value: string): void {
+      try {
+        this.storage.setItem(key, value)
+      } catch (error) {
+        console.error("Erro ao salvar no storage:", error)
+      }
     }
   
-    markNotificationAsRead(driverId: string, notificationId: string): void {
-      const notifications = this.getDriverNotifications(driverId)
-      const notificationIndex = notifications.findIndex((n) => n.id === notificationId)
-      if (notificationIndex === -1) return
-  
-      notifications[notificationIndex].read = true
-      this.setStorageItem(`driver_notifications_${driverId}`, JSON.stringify(notifications))
+    private getStorageItem(key: string): string | null {
+      try {
+        return this.storage.getItem(key)
+      } catch (error) {
+        console.error("Erro ao ler do storage:", error)
+        return null
+      }
     }
   
-    // Sistema de listeners para atualizações em tempo real
-    subscribe(event: string, callback: (data: any) => void): void {
-      this.listeners.set(event, callback)
+    private removeStorageItem(key: string): void {
+      try {
+        this.storage.removeItem(key)
+      } catch (error) {
+        console.error("Erro ao remover do storage:", error)
+      }
     }
   
-    unsubscribe(event: string): void {
-      this.listeners.delete(event)
+    // Sistema de eventos
+    subscribe(event: string, callback: Function): void {
+      if (!this.listeners[event]) {
+        this.listeners[event] = []
+      }
+      this.listeners[event].push(callback)
+    }
+  
+    unsubscribe(event: string, callback: Function): void {
+      if (!this.listeners[event]) return
+      this.listeners[event] = this.listeners[event].filter(cb => cb !== callback)
     }
   
     private notifyListeners(event: string, data: any): void {
-      const callback = this.listeners.get(event)
-      if (callback) {
-        callback(data)
-      }
-    }
-  
-    // Adicionar método para verificar se pode aceitar mais passageiros
-    canAcceptMorePassengers(): boolean {
-      return this.getAvailableCapacity() > 0
-    }
-  
-    // Simular dados de exemplo
-    initializeMockData(): void {
-      // Criar alguns passageiros de exemplo que solicitaram viagem
-      const mockPassengers = [
-        {
-          name: "Maria Silva",
-          phone: "(11) 99999-1111",
-          origin: "Terminal Rodoviário",
-          destination: "Shopping Center",
-          paymentStatus: "paid",
-          paymentMethod: "PIX",
-          amount: "R$ 8,50",
-        },
-        {
-          name: "João Santos",
-          phone: "(11) 99999-2222",
-          origin: "Praça Central",
-          destination: "Hospital Municipal",
-          paymentStatus: "paid",
-          paymentMethod: "Cartão",
-          amount: "R$ 8,50",
-        },
-      ]
-  
-      // Simular solicitações após 2 segundos
-      setTimeout(() => {
-        mockPassengers.forEach((passenger, index) => {
-          setTimeout(() => {
-            this.requestRide(passenger)
-          }, index * 3000) // 3 segundos entre cada solicitação
-        })
-      }, 2000)
+      if (!this.listeners[event]) return
+      this.listeners[event].forEach(callback => {
+        try {
+          callback(data)
+        } catch (error) {
+          console.error(`Erro ao notificar listener do evento ${event}:`, error)
+        }
+      })
     }
   }
   

@@ -203,6 +203,14 @@ export default function DriverDashboard() {
     const trip = realTimeService.startTrip(driver.id, driver, currentRoute?.name || "Linha Centro-Shopping")
     setCurrentTrip(trip)
     console.log("Viagem iniciada:", trip);
+
+    // Gerar passageiros iniciais
+    const initialPassengers = generateNewPassengers();
+    initialPassengers.forEach((passenger) => {
+      setTimeout(() => {
+        realTimeService.requestRide(passenger);
+      }, Math.random() * 3000);
+    });
   }
 
   const handleEndTrip = () => {
